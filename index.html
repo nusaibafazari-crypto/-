@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>تحديات مقهى القياس</title>
+<style>
+:root{
+  --coffee:#5b3526; --latte:#f5e2c7; --cream:#fffaf2; --pink:#f4c6d3;
+  --teal:#bfe3d8; --gold:#d5a15d; --red:#c94b58; --green:#3fa36b; --blue:#6aaed6;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:"Tahoma","Arial",sans-serif;background:
+  radial-gradient(circle at 10% 10%,#fff 0 8%,transparent 9%),
+  linear-gradient(135deg,#f8ead7,#fffaf2 45%,#f1d7c0);
+  color:#3d2b24;min-height:100vh;overflow-x:hidden
+}
+.app{max-width:1180px;margin:auto;padding:18px}
+.header{
+  background:linear-gradient(180deg,#6b3f2c,#4e2e22); color:#fff;
+  border:5px solid #d8a762;border-radius:28px;padding:18px 24px;
+  box-shadow:0 12px 30px #5b35262a;position:relative;overflow:hidden
+}
+.header:after{content:"☕ ☕ ☕ ☕";position:absolute;left:20px;top:12px;opacity:.12;font-size:42px}
+h1{margin:0;font-size:clamp(28px,4vw,52px)}
+.sub{opacity:.9;margin-top:8px;font-size:18px}
+.topbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.pill{background:#fff;color:#5b3526;border-radius:999px;padding:9px 16px;font-weight:700}
+.progressWrap{margin:18px 0;background:#fff3;border:2px solid #fff6;border-radius:999px;height:18px;overflow:hidden}
+.progress{height:100%;width:0;background:linear-gradient(90deg,#f3c1cf,#7fcbb7,#e5b86b);transition:.5s}
+.card{
+  background:#fffaf5;border:4px solid #d8a762;border-radius:28px;
+  padding:22px;margin-top:18px;box-shadow:0 16px 34px #5b35261d
+}
+.title{font-size:28px;font-weight:900;color:#5b3526;margin-bottom:12px}
+.story{background:#fff1df;border:2px dashed #d8a762;border-radius:18px;padding:12px 16px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.option,.draggable,.dropzone,.btn{
+  border:3px solid #d8a762;background:white;border-radius:18px;padding:14px;
+  font-size:20px;font-weight:800;cursor:pointer;transition:.2s;text-align:center
+}
+.option:hover,.draggable:hover,.btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px #5b352622}
+.option.selected{outline:5px solid #7fcbb7}
+.dropzone{min-height:92px;background:#fff7ed;border-style:dashed}
+.dropzone.over{background:#e7f8f2;border-color:#3fa36b}
+.draggable{user-select:none}
+.feedback{min-height:52px;margin-top:16px;border-radius:16px;padding:12px 16px;font-size:20px;font-weight:800}
+.ok{background:#e6f8ed;color:#22653f;border:2px solid #6bc58e}
+.bad{background:#fff0f0;color:#8d2630;border:2px solid #e08d96}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.btn{background:linear-gradient(180deg,#7fcbb7,#5fb39d);color:#fff;border-color:#3c8f7c}
+.btn.secondary{background:linear-gradient(180deg,#e8bd7e,#c78d42);border-color:#a87335}
+.btn.red{background:linear-gradient(180deg,#ef8995,#ce5665);border-color:#ad3b49}
+.hidden{display:none!important}
+.cafeScene{
+  display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#fff,#f8ead7);border-radius:22px;padding:16px;margin:12px 0
+}
+.cup{font-size:64px;animation:float 2.8s ease-in-out infinite}
+.bean{position:fixed;font-size:24px;opacity:.13;animation:fall linear infinite;pointer-events:none}
+@keyframes fall{from{transform:translateY(-10vh) rotate(0)}to{transform:translateY(110vh) rotate(360deg)}}
+@keyframes float{50%{transform:translateY(-7px)}}
+.ruler{
+  height:92px;background:#f4d38e;border:4px solid #7b4a24;border-radius:14px;
+  position:relative;margin:22px auto;max-width:780px
+}
+.ruler .ticks{position:absolute;inset:8px;background:
+ repeating-linear-gradient(90deg,#6c3b1e 0 2px,transparent 2px 15px);
+ height:38px}
+.ruler .labels{display:flex;justify-content:space-between;padding:48px 10px 0;font-weight:900}
+.objectBar{height:24px;background:#f1a7b9;border-radius:12px;position:absolute;top:-38px}
+.timeline{display:flex;align-items:center;gap:0;margin:24px auto;max-width:850px}
+.tnode{flex:1;text-align:center;position:relative}
+.tnode:before{content:"";position:absolute;top:30px;right:50%;left:-50%;height:6px;background:#79b9d5;z-index:0}
+.tnode:first-child:before{display:none}
+.dot{width:28px;height:28px;border-radius:50%;background:#d27f48;margin:17px auto 7px;position:relative;z-index:1;border:4px solid #fff}
+.timeLabel{font-weight:900;font-size:18px}
+.inputRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+input[type="number"],input[type="text"]{
+  font-size:22px;padding:12px 15px;border:3px solid #d8a762;border-radius:14px;width:180px;text-align:center
+}
+.toolCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.tool{font-size:50px}
+.finalScore{font-size:44px;font-weight:900;color:#5b3526;text-align:center}
+.stars{font-size:46px;text-align:center}
+.small{font-size:15px;opacity:.8}
+.confetti{position:fixed;top:-10px;width:10px;height:18px;animation:cf 2.2s linear forwards;pointer-events:none}
+@keyframes cf{to{transform:translateY(110vh) rotate(720deg)}}
+@media(max-width:700px){.app{padding:10px}.card{padding:15px}.title{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="header">
+    <h1>☕ تحديات مقهى القياس</h1>
+    <div class="sub">الصف السادس • الوحدة الثانية: القياس • التعامل مع الطول ورسم الخطوط</div>
+    <div class="topbar">
+      <span class="pill">⭐ النقاط: <b id="score">0</b></span>
+      <span class="pill">🏅 المستوى: <b id="levelNum">1</b>/6</span>
+      <span class="pill">💖 المحاولات: <b id="lives">3</b></span>
+    </div>
+    <div class="progressWrap"><div class="progress" id="progress"></div></div>
+  </section>
+
+  <section class="card" id="intro">
+    <div class="title">قصة اللعبة</div>
+    <div class="cafeScene"><div class="cup">☕</div><div style="font-size:22px;font-weight:800;max-width:700px">
+      قبل افتتاح مقهى القياس، اختلطت بطاقات الوحدات وتعطلت أدوات القياس!
+      أنجزي التحديات الستة لإكمال <b>المسطرة الذهبية</b> وافتتاح المقهى.
+    </div><div class="cup">📏</div></div>
+    <div class="actions"><button class="btn" onclick="startGame()">ابدئي التحدي ✨</button></div>
+  </section>
+
+  <main id="game" class="hidden">
+
+    <section class="card level" data-level="1">
+      <div class="title">١) اختاري الوحدة المناسبة</div>
+      <div class="story">اختاري أفضل وحدة قياس لكل موقف. اضغطي على البطاقة الصحيحة.</div>
+      <div id="unitQ"></div>
+      <div class="grid" id="unitOptions"></div>
+      <div class="feedback" id="fb1"></div>
+      <div class="actions"><button class="btn" onclick="checkUnit()">تحققي ✅</button></div>
+    </section>
+
+    <section class="card level hidden" data-level="2">
+      <div class="title">٢) آلة التحويل ☕⚙️</div>
+      <div class="story">اكتبي الناتج فقط، وسيظهر لكِ إذا كانت آلة التحويل تعمل بطريقة صحيحة.</div>
+      <div id="convQ" style="text-align:center;font-size:30px;font-weight:900;margin:24px"></div>
+      <div class="inputRow"><input id="convAns" type="text" inputmode="decimal" placeholder="اكتبي الناتج"></div>
+      <div class="feedback" id="fb2"></div>
+      <div class="actions"><button class="btn" onclick="checkConv()">تشغيل الآلة ⚡</button></div>
+    </section>
+
+    <section class="card level hidden" data-level="3">
+      <div class="title">٣) قياس لا يبدأ من الصفر 📏</div>
+      <div class="story">طرف الجسم الأول عند <b>٢ سم</b> والطرف الآخر عند <b>٨٫٥ سم</b>. ما طول الجسم؟</div>
+      <div class="ruler">
+        <div class="ticks"></div>
+        <div class="objectBar" style="right:20%;width:65%"></div>
+        <div class="labels"><span>٠</span><span>١</span><span>٢</span><span>٣</span><span>٤</span><span>٥</span><span>٦</span><span>٧</span><span>٨</span><span>٩</span><span>١٠</span></div>
+      </div>
+      <div class="grid">
+        <button class="option" onclick="pickChoice(3,'8.5',this)">٨٫٥ سم</button>
+        <button class="option" onclick="pickChoice(3,'6.5',this)">٦٫٥ سم</button>
+        <button class="option" onclick="pickChoice(3,'10.5',this)">١٠٫٥ سم</button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+      <div class="actions"><button class="btn" onclick="checkChoice(3,'6.5','لأن ٨٫٥ − ٢ = ٦٫٥ سم.')">تحققي ✅</button></div>
+    </section>
+
+    <section class="card level hidden" data-level="4">
+      <div class="title">٤) تحدي أقرب مليمتر 🔍</div>
+      <div class="story">خط طوله <b>٦ سم و٣ ملم</b>. اكتبيه بالمليمتر.</div>
+      <div class="inputRow"><input id="mmAns" type="text" inputmode="numeric" placeholder="____ ملم"></div>
+      <div class="feedback" id="fb4"></div>
+      <div class="actions"><button class="btn" onclick="checkMM()">تحققي من الدقة</button></div>
+    </section>
+
+    <section class="card level hidden" data-level="5">
+      <div class="title">٥) أداة الخط المنحني 🧵</div>
+      <div class="story">المسار حول زخرفة القهوة منحني. أي أداة تساعدكِ على قياسه بدقة ثم نقله إلى المسطرة؟</div>
+      <div class="toolCards">
+        <button class="option" onclick="pickChoice(5,'ruler',this)"><div class="tool">📏</div>المسطرة فقط</button>
+        <button class="option" onclick="pickChoice(5,'string',this)"><div class="tool">🧵</div>خيط مرن ثم مسطرة</button>
+        <button class="option" onclick="pickChoice(5,'cup',this)"><div class="tool">☕</div>كوب القهوة</button>
+      </div>
+      <div class="feedback" id="fb5"></div>
+      <div class="actions"><button class="btn" onclick="checkChoice(5,'string','نغطي المنحنى بالخيط ثم نفرد الخيط على المسطرة.')">تحققي ✅</button></div>
+    </section>
+
+    <section class="card level hidden" data-level="6">
+      <div class="title">٦) التحدي الذهبي 🏆</div>
+      <div class="story">رتبي القياسات من الأصغر إلى الأكبر بسحب البطاقات إلى الأماكن الصحيحة.</div>
+      <div class="grid" id="dragPool"></div>
+      <div class="grid" style="margin-top:14px">
+        <div class="dropzone" data-pos="0">الأصغر</div>
+        <div class="dropzone" data-pos="1">٢</div>
+        <div class="dropzone" data-pos="2">٣</div>
+        <div class="dropzone" data-pos="3">الأكبر</div>
+      </div>
+      <div class="feedback" id="fb6"></div>
+      <div class="actions"><button class="btn" onclick="checkDrag()">افتحي المقهى ✨</button></div>
+    </section>
+
+  </main>
+
+  <section class="card hidden" id="finish">
+    <div class="title" style="text-align:center">🎉 تم افتتاح مقهى القياس!</div>
+    <div class="finalScore">نتيجتك: <span id="finalScore"></span> نقطة</div>
+    <div class="stars" id="stars"></div>
+    <div class="story" style="text-align:center;font-size:20px">
+      أحسنتِ! استخدمتِ الوحدات والتحويلات والمسطرة وقياس المنحنيات بدقة.
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="location.reload()">إعادة اللعب 🔄</button>
+    </div>
+  </section>
+</div>
+
+<script>
+let level=1, score=0, lives=3, selected={}, unitIndex=0, convIndex=0, dragData={};
+const unitQs=[
+ {q:"ما الوحدة الأنسب لقياس سُمك بطاقة قائمة صغيرة؟",a:"ملم",opts:["ملم","سم","م","كم"]},
+ {q:"ما الوحدة الأنسب لقياس طول ملعقة القهوة؟",a:"سم",opts:["ملم","سم","م","كم"]},
+ {q:"ما الوحدة الأنسب لقياس طول طاولة المقهى؟",a:"م",opts:["ملم","سم","م","كم"]},
+ {q:"ما الوحدة الأنسب لمسافة توصيل بين مدينتين؟",a:"كم",opts:["ملم","سم","م","كم"]}
+];
+const convQs=[
+ {q:"٧٠ ملم = ؟ سم",a:"7",hint:"نقسم على ١٠"},
+ {q:"٤ م = ؟ سم",a:"400",hint:"نضرب في ١٠٠"},
+ {q:"٢ كم = ؟ م",a:"2000",hint:"نضرب في ١٠٠٠"},
+ {q:"٤٣٥ سم = ؟ ملم",a:"4350",hint:"نضرب في ١٠"}
+];
+
+function beep(ok=true){
+ const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
+ const c=new AC(),o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination);
+ o.frequency.value=ok?740:190; g.gain.value=.08;o.start();o.stop(c.currentTime+.18);
+}
+function confetti(){
+ for(let i=0;i<35;i++){let x=document.createElement("i");x.className="confetti";
+ x.style.left=Math.random()*100+"vw";x.style.background=["#f4c6d3","#7fcbb7","#e5b86b","#6aaed6"][i%4];
+ x.style.animationDelay=(Math.random()*.5)+"s";document.body.appendChild(x);setTimeout(()=>x.remove(),2800)}
+}
+function hud(){document.getElementById("score").textContent=score;document.getElementById("lives").textContent=lives;document.getElementById("levelNum").textContent=level;document.getElementById("progress").style.width=((level-1)/6*100)+"%"}
+function startGame(){intro.classList.add("hidden");game.classList.remove("hidden");renderUnit();hud()}
+function showFB(id,msg,ok){let f=document.getElementById(id);f.className="feedback "+(ok?"ok":"bad");f.textContent=msg;beep(ok);if(ok)confetti()}
+function next(){
+ document.querySelector(`.level[data-level="${level}"]`).classList.add("hidden");
+ level++; if(level>6){endGame();return}
+ document.querySelector(`.level[data-level="${level}"]`).classList.remove("hidden");
+ if(level===2)renderConv(); if(level===6)setupDrag(); hud(); window.scrollTo({top:0,behavior:"smooth"})
+}
+function reward(){score+=100;hud();setTimeout(next,850)}
+function miss(id,hint){lives--;hud();showFB(id,"❌ حاولي مرة أخرى. "+hint,false);if(lives<=0){lives=3;hud()}}
+function renderUnit(){
+ let q=unitQs[unitIndex];unitQ.innerHTML=`<div style="font-size:28px;font-weight:900;text-align:center;margin:20px">${q.q}</div>`;
+ unitOptions.innerHTML=q.opts.map(o=>`<button class="option" onclick="selectUnit('${o}',this)">${o}</button>`).join("")
+}
+function selectUnit(v,el){selected.unit=v;document.querySelectorAll("#unitOptions .option").forEach(x=>x.classList.remove("selected"));el.classList.add("selected")}
+function checkUnit(){
+ let q=unitQs[unitIndex];if(selected.unit===q.a){score+=25;unitIndex++;showFB("fb1","✅ ممتاز! الوحدة مناسبة.",true);hud();
+ if(unitIndex>=unitQs.length)setTimeout(next,800);else setTimeout(()=>{fb1.className="feedback";fb1.textContent="";selected.unit=null;renderUnit()},700)
+ } else miss("fb1","فكري في حجم الشيء أو طول المسافة.")
+}
+function renderConv(){let q=convQs[convIndex];convQ.textContent=q.q;convAns.value="";fb2.className="feedback";fb2.textContent=""}
+function norm(v){return String(v).trim().replace(/[٠-٩]/g,d=>"0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]).replace("٫",".").replace(",",".")}
+function checkConv(){
+ let q=convQs[convIndex],v=norm(convAns.value);
+ if(v===q.a){score+=25;convIndex++;showFB("fb2","✅ التحويل صحيح!",true);hud();
+ if(convIndex>=convQs.length)setTimeout(next,800);else setTimeout(renderConv,700)
+ } else miss("fb2","تذكري: "+q.hint)
+}
+function pickChoice(n,v,el){selected[n]=v;el.parentElement.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));el.classList.add("selected")}
+function checkChoice(n,a,why){if(selected[n]===a){showFB("fb"+n,"✅ "+why,true);reward()}else miss("fb"+n,"راجعي المعطيات ثم اختاري من جديد.")}
+function checkMM(){let v=norm(mmAns.value);if(v==="63"){showFB("fb4","✅ صحيح: ٦ سم = ٦٠ ملم، ومع ٣ ملم يصبح الطول ٦٣ ملم.",true);reward()}else miss("fb4","حوّلي السنتيمترات إلى مليمترات ثم أضيفي ٣.")}
+function setupDrag(){
+ const items=[["٣٠ سم",30],["٢٥٠ ملم",25],["٠٫٤ م",40],["٣٥ سم",35]].sort(()=>Math.random()-.5);
+ dragPool.innerHTML=items.map(([t,v],i)=>`<div class="draggable" draggable="true" data-v="${v}" id="d${i}">${t}</div>`).join("");
+ document.querySelectorAll(".draggable").forEach(el=>el.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",el.id)));
+ document.querySelectorAll(".dropzone").forEach(z=>{
+   z.ondragover=e=>{e.preventDefault();z.classList.add("over")}; z.ondragleave=()=>z.classList.remove("over");
+   z.ondrop=e=>{e.preventDefault();z.classList.remove("over");let id=e.dataTransfer.getData("text/plain"),el=document.getElementById(id);
+    if(z.querySelector(".draggable")) dragPool.appendChild(z.querySelector(".draggable"));
+    z.appendChild(el);
+   }
+ });
+}
+function checkDrag(){
+ let vals=[...document.querySelectorAll(".dropzone")].map(z=>z.querySelector(".draggable")?.dataset.v);
+ if(vals.join(",")==="25,30,35,40"){showFB("fb6","✅ ترتيب ممتاز: ٢٥٠ ملم، ٣٠ سم، ٣٥ سم، ٠٫٤ م.",true);score+=150;hud();setTimeout(next,900)}
+ else miss("fb6","حوّلي الوحدات ذهنيًا إلى السنتيمتر ثم رتبي.")
+}
+function endGame(){
+ game.classList.add("hidden");finish.classList.remove("hidden");document.getElementById("finalScore").textContent=score;
+ document.getElementById("stars").textContent=score>=550?"⭐⭐⭐":score>=400?"⭐⭐":"⭐";document.getElementById("progress").style.width="100%";confetti();beep(true)
+}
+for(let i=0;i<14;i++){let b=document.createElement("div");b.className="bean";b.textContent="☕";b.style.left=Math.random()*100+"vw";b.style.animationDuration=(7+Math.random()*8)+"s";b.style.animationDelay=(-Math.random()*10)+"s";document.body.appendChild(b)}
+</script>
+</body>
+</html>
